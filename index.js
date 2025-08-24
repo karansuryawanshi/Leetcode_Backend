@@ -41,38 +41,9 @@ app.post("/leetcode-profile", async (req, res) => {
   res.json(data);
 });
 
-// server.js
-// app.post("/leetcode-recent", async (req, res) => {
-//   const { username } = req.body;
-
-//   const response = await fetch("https://leetcode.com/graphql", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       query: `
-//         query recentSubmissions($username: String!) {
-//           recentAcSubmissionList(username: $username, limit: 10) {
-//             id
-//             title
-//             titleSlug
-//             timestamp
-//           }
-//         }
-
-//       `,
-//       variables: { username },
-//     }),
-//   });
-
-//   const data = await response.json();
-//   res.json(data);
-// });
-
-// server.js
 app.post("/leetcode-recent", async (req, res) => {
   const { username } = req.body;
 
-  // 1️⃣ Get recent solved submissions
   const recentRes = await fetch("https://leetcode.com/graphql", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -94,7 +65,6 @@ app.post("/leetcode-recent", async (req, res) => {
   const recentData = await recentRes.json();
   const recentList = recentData.data.recentAcSubmissionList || [];
 
-  // 2️⃣ Fetch extra details for each problem
   const detailedResults = await Promise.all(
     recentList.map(async (q) => {
       const detailsRes = await fetch("https://leetcode.com/graphql", {
@@ -126,8 +96,8 @@ app.post("/leetcode-recent", async (req, res) => {
         timestamp: q.timestamp,
         difficulty: details?.difficulty,
         questionId: details?.questionId,
-        stats: details?.stats, // JSON string with total/accepted submissions
-        beatPercentage: details?.acRate, // % of people solved
+        stats: details?.stats,
+        beatPercentage: details?.acRate,
       };
     })
   );
@@ -135,8 +105,6 @@ app.post("/leetcode-recent", async (req, res) => {
   res.json({ recent: detailedResults });
 });
 
-
-// server.js
 app.post("/leetcode-calendar", async (req, res) => {
   const { username } = req.body;
 
@@ -161,4 +129,7 @@ app.post("/leetcode-calendar", async (req, res) => {
   res.json(data);
 });
 
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () =>
+  console.log(`Server running on http://localhost:${PORT}`)
+);
